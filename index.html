@@ -1,0 +1,1928 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>Tejiendo el Valle — Cultura Diaguita</title>
+  <style>
+    /* =====================================================================
+       PALETA CERÁMICA DIAGUITA Y VARIABLES DE DISEÑO
+       Inspirada en alfarería Santamariana y Belén (engobe crema, rojo óxido,
+       negro carbón, ocre tierra y agua turquesa de acequias).
+       ===================================================================== */
+    :root {
+      --bg-crema: #F4ECD8;
+      --bg-crema-oscuro: #E6D8BC;
+      --panel-superficie: #FAF5E8;
+      --rojo-oxido: #A8382B;
+      --rojo-oxido-oscuro: #7E261C;
+      --negro-carbon: #231F20;
+      --tierra-suave: #5C4938;
+      --ocre-dorado: #C88A36;
+      --agua-turquesa: #3A8E9E;
+      --agua-brillo: #6BD0E0;
+      --verde-valle: #5A7D4C;
+      --sombra-suave: 0 8px 24px rgba(35, 31, 32, 0.14);
+      --borde-ceramica: 3px solid var(--negro-carbon);
+      --radio-grande: 18px;
+      --radio-medio: 12px;
+    }
+
+    * {
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+      user-select: none;
+    }
+
+    html, body {
+      margin: 0;
+      padding: 0;
+      width: 100%;
+      min-height: 100dvh;
+      background-color: var(--bg-crema);
+      background-image:
+        radial-gradient(circle at 15% 20%, rgba(168, 56, 43, 0.06) 0%, transparent 45%),
+        radial-gradient(circle at 85% 80%, rgba(200, 138, 54, 0.08) 0%, transparent 45%);
+      color: var(--negro-carbon);
+      font-family: system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      overflow-x: hidden;
+    }
+
+    /* =====================================================================
+       GUARDA GEOMÉTRICA DIAGUITA DECORATIVA (CSS PURO)
+       ===================================================================== */
+    .guarda-diaguita {
+      width: 100%;
+      height: 14px;
+      background-color: var(--rojo-oxido);
+      background-image: repeating-linear-gradient(
+        90deg,
+        var(--negro-carbon) 0px,
+        var(--negro-carbon) 12px,
+        var(--bg-crema) 12px,
+        var(--bg-crema) 16px,
+        var(--rojo-oxido) 16px,
+        var(--rojo-oxido) 28px,
+        var(--bg-crema) 28px,
+        var(--bg-crema) 32px
+      );
+      border-bottom: 2px solid var(--negro-carbon);
+      flex-shrink: 0;
+    }
+
+    .guarda-diaguita.inferior {
+      border-bottom: none;
+      border-top: 2px solid var(--negro-carbon);
+    }
+
+    /* =====================================================================
+       BARRA SUPERIOR PERSISTENTE (TÍTULO Y SONIDO)
+       ===================================================================== */
+    header.topbar {
+      width: 100%;
+      max-width: 780px;
+      padding: 10px 14px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      z-index: 20;
+    }
+
+    .marca-header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      cursor: pointer;
+    }
+
+    .icono-vasija-badge {
+      width: 38px;
+      height: 38px;
+      border-radius: 50%;
+      background: var(--rojo-oxido);
+      border: 2px solid var(--negro-carbon);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 2px 0 var(--negro-carbon);
+      flex-shrink: 0;
+    }
+
+    .marca-textos h1 {
+      margin: 0;
+      font-size: 1.15rem;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      color: var(--negro-carbon);
+      line-height: 1.1;
+    }
+
+    .marca-textos span {
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: var(--rojo-oxido);
+      display: block;
+    }
+
+    .controles-header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .btn-icon {
+      background: var(--panel-superficie);
+      color: var(--negro-carbon);
+      border: 2px solid var(--negro-carbon);
+      border-radius: 12px;
+      padding: 7px 11px;
+      font-size: 0.85rem;
+      font-weight: 700;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      box-shadow: 0 3px 0 var(--negro-carbon);
+      transition: transform 0.1s ease, background-color 0.15s ease;
+    }
+
+    .btn-icon:active {
+      transform: translateY(2px);
+      box-shadow: 0 1px 0 var(--negro-carbon);
+    }
+
+    .btn-icon.activo {
+      background: #E8F4F6;
+      border-color: var(--negro-carbon);
+    }
+
+    /* =====================================================================
+       CONTENEDOR PRINCIPAL Y VISTAS (PORTADA, JUEGO, RESUMEN)
+       ===================================================================== */
+    main.contenedor-app {
+      width: 100%;
+      max-width: 780px;
+      flex: 1;
+      padding: 8px 14px 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .vista {
+      width: 100%;
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      animation: aparecer 0.28s ease-out;
+    }
+
+    .vista.activa {
+      display: flex;
+    }
+
+    @keyframes aparecer {
+      from { opacity: 0; transform: translateY(8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* =====================================================================
+       TARJETA DE PORTADA ESCOLAR
+       ===================================================================== */
+    .tarjeta-portada {
+      width: 100%;
+      background: var(--panel-superficie);
+      border: var(--borde-ceramica);
+      border-radius: var(--radio-grande);
+      box-shadow: 0 6px 0 var(--negro-carbon), var(--sombra-suave);
+      overflow: hidden;
+    }
+
+    .portada-hero {
+      background: linear-gradient(135deg, var(--rojo-oxido) 0%, var(--rojo-oxido-oscuro) 100%);
+      color: var(--bg-crema);
+      padding: 20px 18px 18px;
+      text-align: center;
+      border-bottom: 3px solid var(--negro-carbon);
+      position: relative;
+    }
+
+    .etiqueta-escolar {
+      display: inline-block;
+      background: var(--negro-carbon);
+      color: var(--bg-crema);
+      font-size: 0.72rem;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      padding: 4px 12px;
+      border-radius: 999px;
+      margin-bottom: 10px;
+    }
+
+    .portada-hero h2 {
+      margin: 0 0 6px;
+      font-size: clamp(1.7rem, 5vw, 2.3rem);
+      font-weight: 900;
+      letter-spacing: -0.02em;
+      text-shadow: 2px 2px 0 var(--negro-carbon);
+    }
+
+    .portada-hero p.subtitulo {
+      margin: 0;
+      font-size: 0.95rem;
+      opacity: 0.95;
+      font-weight: 500;
+    }
+
+    .portada-cuerpo {
+      padding: 18px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .caja-contexto {
+      background: var(--bg-crema);
+      border: 2px solid var(--negro-carbon);
+      border-radius: var(--radio-medio);
+      padding: 14px;
+      display: flex;
+      gap: 14px;
+      align-items: center;
+    }
+
+    .canvas-emblema-wrap {
+      flex-shrink: 0;
+      width: 84px;
+      height: 84px;
+      border-radius: 14px;
+      border: 2px solid var(--negro-carbon);
+      background: var(--panel-superficie);
+      overflow: hidden;
+    }
+
+    #canvasEmblema {
+      width: 100%;
+      height: 100%;
+      display: block;
+    }
+
+    .caja-contexto p {
+      margin: 0;
+      font-size: 0.9rem;
+      line-height: 1.48;
+      color: var(--negro-carbon);
+    }
+
+    .caja-contexto strong {
+      color: var(--rojo-oxido);
+    }
+
+    .guia-rapida-gestos {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    .pill-gesto {
+      background: #EFE5CE;
+      border: 2px solid var(--negro-carbon);
+      border-radius: 12px;
+      padding: 10px;
+      font-size: 0.82rem;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-weight: 600;
+    }
+
+    .pill-gesto .badge-num {
+      width: 26px;
+      height: 26px;
+      border-radius: 8px;
+      background: var(--ocre-dorado);
+      color: var(--negro-carbon);
+      border: 2px solid var(--negro-carbon);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 900;
+      flex-shrink: 0;
+    }
+
+    .grupo-botones-inicio {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .btn-principal {
+      width: 100%;
+      padding: 14px 18px;
+      border-radius: 14px;
+      border: 3px solid var(--negro-carbon);
+      font-size: 1rem;
+      font-weight: 800;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      box-shadow: 0 4px 0 var(--negro-carbon);
+      transition: transform 0.1s ease, filter 0.15s ease;
+    }
+
+    .btn-principal:active {
+      transform: translateY(3px);
+      box-shadow: 0 1px 0 var(--negro-carbon);
+    }
+
+    .btn-desafio {
+      background: var(--rojo-oxido);
+      color: var(--bg-crema);
+    }
+
+    .btn-practica {
+      background: var(--agua-turquesa);
+      color: #FFFFFF;
+    }
+
+    .btn-secundario {
+      background: var(--bg-crema-oscuro);
+      color: var(--negro-carbon);
+    }
+
+    /* =====================================================================
+       PANTALLA DE JUEGO: HUD + TABLERO CANVAS + CONTROLES INFERIORES
+       ===================================================================== */
+    .hud-juego {
+      width: 100%;
+      background: var(--panel-superficie);
+      border: var(--borde-ceramica);
+      border-radius: var(--radio-medio);
+      padding: 10px 12px;
+      margin-bottom: 10px;
+      box-shadow: 0 4px 0 var(--negro-carbon);
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .hud-fila-superior {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .nivel-titulo-badge {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .nivel-numero {
+      background: var(--rojo-oxido);
+      color: var(--bg-crema);
+      font-weight: 900;
+      font-size: 0.8rem;
+      padding: 4px 10px;
+      border-radius: 8px;
+      border: 2px solid var(--negro-carbon);
+    }
+
+    .nivel-nombre {
+      font-weight: 800;
+      font-size: 0.96rem;
+      color: var(--negro-carbon);
+    }
+
+    .hud-metricas {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .metrica-pill {
+      background: var(--bg-crema);
+      border: 2px solid var(--negro-carbon);
+      border-radius: 8px;
+      padding: 3px 9px;
+      font-size: 0.8rem;
+      font-weight: 800;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .metrica-pill.tiempo-alerta {
+      background: #FDE2DF;
+      color: var(--rojo-oxido-oscuro);
+      border-color: var(--rojo-oxido);
+    }
+
+    .objetivo-barra {
+      font-size: 0.82rem;
+      color: var(--tierra-suave);
+      background: #EFE5CE;
+      padding: 6px 10px;
+      border-radius: 8px;
+      border: 1px solid rgba(35, 31, 32, 0.25);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+    }
+
+    .estado-conexion {
+      font-weight: 800;
+      color: var(--rojo-oxido);
+      white-space: nowrap;
+    }
+
+    .estado-conexion.conectado {
+      color: var(--verde-valle);
+    }
+
+    .marco-tablero {
+      width: 100%;
+      max-width: 500px;
+      aspect-ratio: 1 / 1;
+      background: var(--negro-carbon);
+      padding: 6px;
+      border-radius: 20px;
+      box-shadow: 0 8px 0 var(--negro-carbon), var(--sombra-suave);
+      position: relative;
+      touch-action: none;
+    }
+
+    canvas#tableroCanvas {
+      width: 100%;
+      height: 100%;
+      display: block;
+      border-radius: 14px;
+      background: var(--bg-crema);
+      touch-action: none;
+      cursor: pointer;
+    }
+
+    .barra-acciones-tablero {
+      width: 100%;
+      max-width: 500px;
+      margin-top: 12px;
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 8px;
+    }
+
+    .btn-accion-tablero {
+      background: var(--panel-superficie);
+      border: 2px solid var(--negro-carbon);
+      border-radius: 12px;
+      padding: 10px 8px;
+      font-size: 0.82rem;
+      font-weight: 800;
+      color: var(--negro-carbon);
+      cursor: pointer;
+      box-shadow: 0 3px 0 var(--negro-carbon);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 5px;
+    }
+
+    .btn-accion-tablero:active {
+      transform: translateY(2px);
+      box-shadow: 0 1px 0 var(--negro-carbon);
+    }
+
+    .ayuda-gesto-pie {
+      margin-top: 8px;
+      font-size: 0.78rem;
+      color: var(--tierra-suave);
+      text-align: center;
+      font-weight: 600;
+    }
+
+    /* =====================================================================
+       MODAL FICHA HISTÓRICA ENTRE NIVELES
+       ===================================================================== */
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(35, 31, 32, 0.72);
+      backdrop-filter: blur(3px);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+      z-index: 100;
+    }
+
+    .modal-backdrop.abierto {
+      display: flex;
+      animation: aparecer 0.22s ease-out;
+    }
+
+    .modal-tarjeta {
+      width: 100%;
+      max-width: 480px;
+      max-height: 90dvh;
+      overflow-y: auto;
+      background: var(--panel-superficie);
+      border: 3px solid var(--negro-carbon);
+      border-radius: 20px;
+      box-shadow: 0 8px 0 var(--negro-carbon);
+    }
+
+    .modal-cabecera.historia {
+      background: var(--rojo-oxido);
+      color: var(--bg-crema);
+      padding: 14px 18px;
+      border-bottom: 3px solid var(--negro-carbon);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .modal-cabecera h3 {
+      margin: 0;
+      font-size: 1.12rem;
+      font-weight: 900;
+    }
+
+    .modal-cuerpo {
+      padding: 18px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .ilustracion-historia-box {
+      width: 100%;
+      height: 130px;
+      background: var(--bg-crema);
+      border: 2px solid var(--negro-carbon);
+      border-radius: 14px;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    #canvasIlustracionHistoria {
+      width: 100%;
+      height: 100%;
+      display: block;
+    }
+
+    .texto-historico {
+      margin: 0;
+      font-size: 0.94rem;
+      line-height: 1.55;
+      color: var(--negro-carbon);
+    }
+
+    .dato-clave-box {
+      background: #EFE5CE;
+      border-left: 5px solid var(--rojo-oxido);
+      padding: 10px 12px;
+      border-radius: 8px;
+      font-size: 0.84rem;
+      font-weight: 600;
+    }
+
+    /* =====================================================================
+       PANTALLA FINAL / CIERRE DE PARTIDA
+       ===================================================================== */
+    .resumen-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+      text-align: center;
+    }
+
+    .resumen-stat {
+      background: var(--bg-crema);
+      border: 2px solid var(--negro-carbon);
+      border-radius: 12px;
+      padding: 10px 6px;
+    }
+
+    .resumen-stat .valor {
+      display: block;
+      font-size: 1.3rem;
+      font-weight: 900;
+      color: var(--rojo-oxido);
+    }
+
+    .resumen-stat .etiqueta {
+      font-size: 0.75rem;
+      font-weight: 700;
+      color: var(--tierra-suave);
+    }
+
+    @media (max-width: 440px) {
+      .caja-contexto {
+        flex-direction: column;
+        text-align: center;
+      }
+      .guia-rapida-gestos {
+        grid-template-columns: 1fr;
+      }
+      .marca-textos h1 {
+        font-size: 1.02rem;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="guarda-diaguita" aria-hidden="true"></div>
+
+  <header class="topbar">
+    <div class="marca-header" id="btnVolverInicioLogo" title="Volver a la portada">
+      <div class="icono-vasija-badge" aria-hidden="true">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
+          <path d="M8 3H16L14.5 6.5C17.5 8 19 11 19 14.5C19 18.5 16 21 12 21C8 21 5 18.5 5 14.5C5 11 6.5 8 9.5 6.5L8 3Z" fill="#F4ECD8" stroke="#231F20" stroke-width="2"/>
+          <path d="M6.5 13H17.5M7.5 16.5H16.5" stroke="#A8382B" stroke-width="2"/>
+        </svg>
+      </div>
+      <div class="marca-textos">
+        <h1>Tejiendo el Valle</h1>
+        <span>Cultura Diaguita · Historia y Territorio</span>
+      </div>
+    </div>
+
+    <div class="controles-header">
+      <button type="button" class="btn-icon activo" id="btnAudio" aria-label="Activar o silenciar sonido">
+        <span id="iconoAudio">🔊</span>
+        <span id="textoAudio">Sonido</span>
+      </button>
+    </div>
+  </header>
+
+  <main class="contenedor-app">
+
+    <!-- VISTA 1: PORTADA -->
+    <section id="vistaInicio" class="vista activa" aria-label="Pantalla de inicio">
+      <div class="tarjeta-portada">
+        <div class="portada-hero">
+          <span class="etiqueta-escolar">Proyecto Educativo · Pueblos Originarios del NOA</span>
+          <h2>Tejiendo el Valle</h2>
+          <p class="subtitulo">Agua, caminos y cerámica en los Valles Calchaquíes</p>
+        </div>
+
+        <div class="portada-cuerpo">
+          <div class="caja-contexto">
+            <div class="canvas-emblema-wrap">
+              <canvas id="canvasEmblema" width="168" height="168"></canvas>
+            </div>
+            <p>
+              En los valles áridos del noroeste argentino, las comunidades <strong>diaguitas</strong> construyeron redes de <strong>acequias</strong> para regar terrazas de cultivo y <strong>senderos de intercambio</strong> por donde circulaban maíz, llamas, metales y sus célebres <strong>vasijas ceremoniales</strong> pintadas con símbolos del agua y la tierra.
+            </p>
+          </div>
+
+          <div class="guia-rapida-gestos">
+            <div class="pill-gesto">
+              <span class="badge-num">1</span>
+              <span><strong>Tocá</strong> una ficha para rotarla 90°</span>
+            </div>
+            <div class="pill-gesto">
+              <span class="badge-num">2</span>
+              <span><strong>Deslizá</strong> fichas libres para moverlas</span>
+            </div>
+          </div>
+
+          <div class="grupo-botones-inicio">
+            <button type="button" class="btn-principal btn-desafio" id="btnIniciarDesafio">
+              <span>🏺</span>
+              <span>Jugar Modo Desafío</span>
+            </button>
+            <button type="button" class="btn-principal btn-practica" id="btnIniciarPractica">
+              <span>🌿</span>
+              <span>Modo Clase / Práctica (Sin Tiempo)</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- VISTA 2: TABLERO DE JUEGO 2D -->
+    <section id="vistaJuego" class="vista" aria-label="Tablero de juego">
+      <div class="hud-juego">
+        <div class="hud-fila-superior">
+          <div class="nivel-titulo-badge">
+            <span class="nivel-numero" id="hudNivelNum">Nivel 1/5</span>
+            <span class="nivel-nombre" id="hudNivelNombre">La Primera Acequia</span>
+          </div>
+          <div class="hud-metricas">
+            <div class="metrica-pill" id="pillModo">Modo Clase</div>
+            <div class="metrica-pill" id="pillTiempo" style="display:none;">⏱️ <span id="hudTiempo">01:30</span></div>
+            <div class="metrica-pill">⭐ <span id="hudPuntos">0</span></div>
+          </div>
+        </div>
+
+        <div class="objetivo-barra">
+          <span id="hudObjetivoTexto">Conectá la vertiente con la vasija santamariana.</span>
+          <span class="estado-conexion" id="hudEstadoConexion">0 / 1 conectadas</span>
+        </div>
+      </div>
+
+      <div class="marco-tablero">
+        <canvas id="tableroCanvas"></canvas>
+      </div>
+
+      <div class="barra-acciones-tablero">
+        <button type="button" class="btn-accion-tablero" id="btnMenuDesdeJuego">
+          <span>🏠</span><span>Inicio</span>
+        </button>
+        <button type="button" class="btn-accion-tablero" id="btnReiniciarNivel">
+          <span>🔄</span><span>Reiniciar</span>
+        </button>
+        <button type="button" class="btn-accion-tablero" id="btnPista">
+          <span>💡</span><span>Pista</span>
+        </button>
+      </div>
+
+      <p class="ayuda-gesto-pie">
+        Tocá una ficha para girarla · Deslizá hacia un espacio libre para desplazarla · Las piezas con remaches son fijas
+      </p>
+    </section>
+
+    <!-- VISTA 3: CIERRE Y RESUMEN FINAL -->
+    <section id="vistaFinal" class="vista" aria-label="Resumen final">
+      <div class="tarjeta-portada">
+        <div class="portada-hero">
+          <span class="etiqueta-escolar" id="etiquetaFinalModo">Recorrido Completado</span>
+          <h2 id="tituloFinal">¡Valle Conectado!</h2>
+          <p class="subtitulo" id="subtituloFinal">Has tejido las redes de agua y cerámica del mundo diaguita</p>
+        </div>
+
+        <div class="portada-cuerpo">
+          <div class="resumen-grid">
+            <div class="resumen-stat">
+              <span class="valor" id="finalNiveles">5 / 5</span>
+              <span class="etiqueta">Niveles</span>
+            </div>
+            <div class="resumen-stat">
+              <span class="valor" id="finalPuntaje">0</span>
+              <span class="etiqueta">Puntaje Total</span>
+            </div>
+            <div class="resumen-stat">
+              <span class="valor" id="finalMovimientos">0</span>
+              <span class="etiqueta">Movimientos</span>
+            </div>
+          </div>
+
+          <p class="texto-historico" style="font-size:0.88rem;">
+            Gracias a la ingeniería hidráulica comunitaria, las terrazas agrícolas y la alfarería simbólica, las sociedades diaguitas prosperaron en ambientes de montaña dejando un legado vivo en el noroeste argentino.
+          </p>
+
+          <div class="grupo-botones-inicio">
+            <button type="button" class="btn-principal btn-desafio" id="btnJugarDeNuevo">
+              <span>🔁</span>
+              <span>Volver a Jugar</span>
+            </button>
+            <button type="button" class="btn-principal btn-secundario" id="btnVolverPortadaFinal">
+              <span>🏠</span>
+              <span>Volver a la Portada / Cambiar Modo</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- MODAL FICHA HISTÓRICA ENTRE NIVELES -->
+  <div class="modal-backdrop" id="modalHistoria" role="dialog" aria-modal="true" aria-labelledby="modalHistoriaTitulo">
+    <div class="modal-tarjeta">
+      <div class="modal-cabecera historia">
+        <h3 id="modalHistoriaTitulo">Saberes del Valle</h3>
+        <span style="font-weight:800; font-size:0.85rem;" id="modalHistoriaBadge">+200 pts</span>
+      </div>
+      <div class="modal-cuerpo">
+        <div class="ilustracion-historia-box">
+          <canvas id="canvasIlustracionHistoria" width="420" height="130"></canvas>
+        </div>
+        <p class="texto-historico" id="modalHistoriaTexto"></p>
+        <div class="dato-clave-box" id="modalHistoriaDatoClave"></div>
+        <button type="button" class="btn-principal btn-desafio" id="btnSiguienteNivel">
+          <span>Continuar al Siguiente Valle</span>
+          <span>➡️</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div class="guarda-diaguita inferior" aria-hidden="true"></div>
+
+  <script>
+    /* =======================================================================
+       1. SISTEMA DE AUDIO PROCEDURAL (WEB AUDIO API - ESCALA PENTATÓNICA ANDINA)
+       ======================================================================= */
+    class SonidoAndino {
+      constructor() {
+        this.ctx = null;
+        this.habilitado = true;
+        this.notas = [293.66, 349.23, 392.00, 440.00, 523.25, 587.33, 698.46, 880.00];
+      }
+
+      inicializar() {
+        if (!this.ctx) {
+          const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+          if (AudioContextClass) {
+            this.ctx = new AudioContextClass();
+          }
+        }
+        if (this.ctx && this.ctx.state === 'suspended') {
+          this.ctx.resume();
+        }
+      }
+
+      alternar() {
+        this.habilitado = !this.habilitado;
+        if (this.habilitado) {
+          this.inicializar();
+          this.tocarNota(440, 0.12, 'sine', 0.14);
+        }
+        return this.habilitado;
+      }
+
+      tocarNota(freq, duracion = 0.18, tipo = 'sine', volumen = 0.16, retardo = 0) {
+        if (!this.habilitado) return;
+        this.inicializar();
+        if (!this.ctx) return;
+
+        const ahora = this.ctx.currentTime + retardo;
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+
+        osc.type = tipo;
+        osc.frequency.setValueAtTime(freq, ahora);
+
+        gain.gain.setValueAtTime(0.0001, ahora);
+        gain.gain.exponentialRampToValueAtTime(volumen, ahora + 0.02);
+        gain.gain.exponentialRampToValueAtTime(0.0001, ahora + duracion);
+
+        osc.connect(gain);
+        gain.connect(this.ctx.destination);
+
+        osc.start(ahora);
+        osc.stop(ahora + duracion + 0.02);
+      }
+
+      sonidoRotar() {
+        const nota = this.notas[Math.floor(Math.random() * 4)];
+        this.tocarNota(nota, 0.13, 'triangle', 0.14);
+      }
+
+      sonidoDeslizar() {
+        this.tocarNota(261.63, 0.09, 'sine', 0.14, 0);
+        this.tocarNota(349.23, 0.12, 'sine', 0.14, 0.05);
+      }
+
+      sonidoBloqueado() {
+        this.tocarNota(146.83, 0.12, 'triangle', 0.12);
+      }
+
+      sonidoConectarObjetivo(cantidadConectados) {
+        const idx = Math.min(cantidadConectados + 2, this.notas.length - 1);
+        this.tocarNota(this.notas[idx], 0.25, 'sine', 0.18);
+      }
+
+      sonidoNivelCompletado() {
+        const secuencia = [293.66, 349.23, 440.00, 523.25, 587.33];
+        secuencia.forEach((freq, i) => {
+          this.tocarNota(freq, 0.35, 'triangle', 0.16, i * 0.09);
+        });
+      }
+    }
+
+    const audio = new SonidoAndino();
+
+    /* =======================================================================
+       2. DEFINICIÓN DE NIVELES Y CONTENIDO HISTÓRICO DIAGUITA
+       Direcciones bitmask: 1 = Norte, 2 = Este, 4 = Sur, 8 = Oeste
+       ======================================================================= */
+    const NIVELES = [
+      {
+        id: 1,
+        nombre: "La Primera Acequia",
+        grilla: 5,
+        tiempoDesafio: 95,
+        objetivoTexto: "Llevá el agua desde la vertiente hasta la urna santamariana.",
+        historiaTitulo: "El Agua en los Valles Áridos",
+        historiaTexto: "Los pueblos diaguitas habitaron los Valles Calchaquíes y regiones vecinas, donde las lluvias son escasas. Para cultivar maíz, zapallo, porotos y quínoa, construyeron extensas redes de acequias y canales de piedra que distribuían el agua de deshielo de las montañas hacia las terrazas agrícolas.",
+        datoClave: "Dato clave: El manejo comunitario del agua permitía sostener aldeas enteras en ambientes semiáridos de montaña.",
+        ilustracionTipo: "acequias",
+        tablero: [
+          [ ['roca',0,0,true],   ['fuente',4,0,true],  ['roca',0,0,true],   ['vacio',0,0,false],  ['roca',0,0,true] ],
+          [ ['vacio',0,0,false], ['tramo',5,1,false],  ['tramo',6,2,false], ['tramo',12,1,false], ['vacio',0,0,false] ],
+          [ ['roca',0,0,true],   ['tramo',3,0,false],  ['tramo',10,1,false],['tramo',5,0,false],  ['roca',0,0,true] ],
+          [ ['vacio',0,0,false], ['vacio',0,0,false],  ['tramo',3,3,false], ['tramo',9,2,false],  ['vacio',0,0,false] ],
+          [ ['roca',0,0,true],   ['roca',0,0,true],    ['destino',1,0,true],['roca',0,0,true],   ['roca',0,0,true] ]
+        ]
+      },
+      {
+        id: 2,
+        nombre: "El Taller Alfarero",
+        grilla: 5,
+        tiempoDesafio: 110,
+        objetivoTexto: "Conectá el taller con las dos vasijas ceremoniales del valle.",
+        historiaTitulo: "Cerámica Santamariana y Belén",
+        historiaTexto: "La alfarería diaguita es una de las expresiones artísticas más sofisticadas de Sudamérica prehispánica. Sus grandes urnas funerarias y pucos (cuencos) fueron modelados sin torno y decorados con pinceles finos usando pigmentos minerales: negro sobre engobe crema o rojo óxido.",
+        datoClave: "Dato clave: Sus diseños incluyen serpientes bicéfalas, suris (ñandúes), sapos y guardas escalonadas vinculadas a la lluvia y la fertilidad.",
+        ilustracionTipo: "ceramica",
+        tablero: [
+          [ ['roca',0,0,true],   ['roca',0,0,true],    ['fuente',4,0,true],  ['roca',0,0,true],    ['roca',0,0,true] ],
+          [ ['vacio',0,0,false], ['tramo',6,1,false],  ['tramo',14,2,false], ['tramo',12,3,false], ['vacio',0,0,false] ],
+          [ ['tramo',6,2,false], ['tramo',9,1,false],  ['roca',0,0,true],    ['tramo',5,1,false],  ['tramo',12,0,false] ],
+          [ ['tramo',5,1,false], ['vacio',0,0,false],  ['vacio',0,0,false],  ['vacio',0,0,false],  ['tramo',5,1,false] ],
+          [ ['destino',1,0,true],['roca',0,0,true],    ['roca',0,0,true],    ['roca',0,0,true],    ['destino',1,0,true] ]
+        ]
+      },
+      {
+        id: 3,
+        nombre: "Senderos de Caravanas",
+        grilla: 5,
+        tiempoDesafio: 120,
+        objetivoTexto: "Deslizá y girá tramos para unir el camino de llamas con ambos poblados.",
+        historiaTitulo: "Redes de Intercambio Regional",
+        historiaTexto: "A través de senderos que atravesaban quebradas, valles y abras de altura, caravanas de llamas transportaban bienes entre distintas regiones ecológicas: sal y obsidiana desde la Puna, madera y plumas desde las yungas orientales, y piezas de bronce y cerámica desde los valles.",
+        datoClave: "Dato clave: El intercambio fortalecía los lazos sociales y políticos entre las distintas jefaturas diaguitas.",
+        ilustracionTipo: "caminos",
+        tablero: [
+          [ ['fuente',2,0,true], ['tramo',10,1,false], ['tramo',12,1,false], ['vacio',0,0,false],  ['roca',0,0,true] ],
+          [ ['roca',0,0,true],   ['vacio',0,0,false],  ['tramo',7,2,false],  ['tramo',12,2,false], ['vacio',0,0,false] ],
+          [ ['vacio',0,0,false], ['tramo',6,0,false],  ['tramo',9,1,false],  ['tramo',5,0,false],  ['tramo',12,1,false] ],
+          [ ['roca',0,0,true],   ['tramo',5,1,false],  ['vacio',0,0,false],  ['tramo',3,2,false],  ['tramo',9,0,false] ],
+          [ ['roca',0,0,true],   ['destino',1,0,true], ['roca',0,0,true],    ['destino',1,0,true], ['roca',0,0,true] ]
+        ]
+      },
+      {
+        id: 4,
+        nombre: "Andenes de la Quebrada",
+        grilla: 6,
+        tiempoDesafio: 140,
+        objetivoTexto: "Tejé la red completa de riego hacia las tres terrazas del valle.",
+        historiaTitulo: "Terrazas de Cultivo y Poblados",
+        historiaTexto: "Para aprovechar las laderas de los cerros y evitar la erosión del suelo, los diaguitas levantaron muros de piedra llamados andenes o terrazas de cultivo. En lo alto de los morros construyeron poblados fortificados o pukaras que vigilaban los valles y caminos.",
+        datoClave: "Dato clave: Sitios arqueológicos como Quilmes, Tolombón y Shincal reflejan la planificación urbana y agrícola de estos pueblos.",
+        ilustracionTipo: "terrazas",
+        tablero: [
+          [ ['roca',0,0,true],   ['fuente',4,0,true],  ['roca',0,0,true],    ['roca',0,0,true],    ['roca',0,0,true],    ['roca',0,0,true] ],
+          [ ['vacio',0,0,false], ['tramo',7,1,false],  ['tramo',10,1,false], ['tramo',12,2,false], ['vacio',0,0,false],  ['roca',0,0,true] ],
+          [ ['tramo',6,3,false], ['tramo',9,2,false],  ['roca',0,0,true],    ['tramo',7,0,false],  ['tramo',12,1,false], ['vacio',0,0,false] ],
+          [ ['tramo',5,1,false], ['vacio',0,0,false],  ['tramo',6,1,false],  ['tramo',9,3,false],  ['tramo',5,0,false],  ['tramo',12,2,false] ],
+          [ ['tramo',3,1,false], ['tramo',12,0,false], ['tramo',5,1,false],  ['vacio',0,0,false],  ['tramo',3,0,false],  ['tramo',9,1,false] ],
+          [ ['roca',0,0,true],   ['destino',1,0,true], ['destino',1,0,true], ['roca',0,0,true],    ['destino',1,0,true], ['roca',0,0,true] ]
+        ]
+      },
+      {
+        id: 5,
+        nombre: "Gran Red Calchaquí",
+        grilla: 6,
+        tiempoDesafio: 165,
+        objetivoTexto: "Conectá el centro ceremonial con los cuatro asentamientos del valle.",
+        historiaTitulo: "Identidad y Memoria Viva",
+        historiaTexto: "Durante más de un siglo, las confederaciones diaguitas resistieron el avance colonial defendiendo su territorio y autonomía en las llamadas Guerras Calchaquíes. Hoy, numerosas comunidades diaguitas en el noroeste argentino mantienen viva su lengua kakán en topónimos, su alfarería tradicional y el respeto por la Pachamama.",
+        datoClave: "Dato clave: Nombres como Amaicha, Cafayate, Quilmes, Tilcara y Belén conservan la huella cultural de los pueblos originarios del NOA.",
+        ilustracionTipo: "memoria",
+        tablero: [
+          [ ['roca',0,0,true],    ['destino',4,0,true], ['roca',0,0,true],    ['roca',0,0,true],    ['destino',4,0,true], ['roca',0,0,true] ],
+          [ ['vacio',0,0,false],  ['tramo',7,2,false],  ['tramo',10,1,false], ['tramo',10,0,false], ['tramo',13,1,false], ['vacio',0,0,false] ],
+          [ ['tramo',6,1,false],  ['tramo',9,0,false],  ['roca',0,0,true],    ['fuente',6,0,true],  ['tramo',11,2,false], ['tramo',12,3,false] ],
+          [ ['tramo',5,0,false],  ['vacio',0,0,false],  ['tramo',6,2,false],  ['tramo',15,1,false], ['tramo',9,3,false],  ['tramo',5,1,false] ],
+          [ ['tramo',3,2,false],  ['tramo',10,1,false], ['tramo',9,1,false],  ['tramo',5,0,false],  ['vacio',0,0,false],  ['tramo',5,0,false] ],
+          [ ['roca',0,0,true],    ['roca',0,0,true],    ['roca',0,0,true],    ['destino',1,0,true], ['roca',0,0,true],    ['destino',1,0,true] ]
+        ]
+      }
+    ];
+
+    /* =======================================================================
+       3. ESTADO GLOBAL DEL JUEGO
+       ======================================================================= */
+    const estado = {
+      modo: 'practica',
+      nivelActualIdx: 0,
+      grillaSize: 5,
+      celdas: [],
+      puntajeTotal: 0,
+      movimientosNivel: 0,
+      movimientosTotales: 0,
+      tiempoRestante: 0,
+      timerId: null,
+      nivelResuelto: false,
+      objetivosTotales: 0,
+      objetivosConectadosPrevios: 0,
+      celdaPista: null,
+      tiempoPista: 0,
+      particulas: [],
+      animacionTiempo: 0,
+      punteroActivo: false,
+      celdaInicioGesto: null,
+      inicioX: 0,
+      inicioY: 0,
+      deslizoEnGesto: false
+    };
+
+    /* =======================================================================
+       4. LÓGICA DE GRILLA, ROTACIÓN, DESLIZAMIENTO Y CONECTIVIDAD (BFS)
+       ======================================================================= */
+    function rotarMask90(mask) {
+      let nueva = 0;
+      if (mask & 1) nueva |= 2;
+      if (mask & 2) nueva |= 4;
+      if (mask & 4) nueva |= 8;
+      if (mask & 8) nueva |= 1;
+      return nueva;
+    }
+
+    function obtenerMaskActual(celda) {
+      let m = celda.maskBase;
+      for (let i = 0; i < (celda.rotacion % 4); i++) {
+        m = rotarMask90(m);
+      }
+      return m;
+    }
+
+    function cargarNivel(idx) {
+      detenerTimer();
+      estado.nivelActualIdx = idx;
+      const def = NIVELES[idx];
+      estado.grillaSize = def.grilla;
+      estado.nivelResuelto = false;
+      estado.movimientosNivel = 0;
+      estado.celdaPista = null;
+      estado.particulas = [];
+      estado.objetivosTotales = 0;
+      estado.objetivosConectadosPrevios = 0;
+
+      estado.celdas = [];
+      for (let r = 0; r < def.grilla; r++) {
+        const fila = [];
+        for (let c = 0; c < def.grilla; c++) {
+          const [tipo, maskBase, rotInit, fija] = def.tablero[r][c];
+          if (tipo === 'destino') estado.objetivosTotales++;
+          fila.push({
+            r,
+            c,
+            tipo,
+            maskBase,
+            rotacion: rotInit,
+            anguloVisual: rotInit * (Math.PI / 2),
+            fija,
+            conectada: false,
+            offsetX: 0,
+            offsetY: 0
+          });
+        }
+        estado.celdas.push(fila);
+      }
+
+      document.getElementById('hudNivelNum').textContent = `Nivel ${idx + 1}/${NIVELES.length}`;
+      document.getElementById('hudNivelNombre').textContent = def.nombre;
+      document.getElementById('hudObjetivoTexto').textContent = def.objetivoTexto;
+      document.getElementById('hudPuntos').textContent = estado.puntajeTotal;
+
+      const pillModo = document.getElementById('pillModo');
+      const pillTiempo = document.getElementById('pillTiempo');
+
+      if (estado.modo === 'desafio') {
+        pillModo.textContent = 'Desafío';
+        pillTiempo.style.display = 'flex';
+        estado.tiempoRestante = def.tiempoDesafio;
+        actualizarTextoTiempo();
+        iniciarTimer();
+      } else {
+        pillModo.textContent = 'Modo Clase';
+        pillTiempo.style.display = 'none';
+      }
+
+      evaluarConexiones(false);
+      ajustarDimensionesCanvas();
+    }
+
+    function iniciarTimer() {
+      detenerTimer();
+      const pillTiempo = document.getElementById('pillTiempo');
+      pillTiempo.classList.remove('tiempo-alerta');
+      estado.timerId = setInterval(() => {
+        if (estado.nivelResuelto) return;
+        estado.tiempoRestante--;
+        if (estado.tiempoRestante <= 15) {
+          pillTiempo.classList.add('tiempo-alerta');
+        }
+        if (estado.tiempoRestante <= 0) {
+          estado.tiempoRestante = 0;
+          actualizarTextoTiempo();
+          detenerTimer();
+          document.getElementById('hudObjetivoTexto').textContent = "¡Tiempo agotado! Completá la red para avanzar sin bonificación.";
+        } else {
+          actualizarTextoTiempo();
+        }
+      }, 1000);
+    }
+
+    function detenerTimer() {
+      if (estado.timerId) {
+        clearInterval(estado.timerId);
+        estado.timerId = null;
+      }
+    }
+
+    function actualizarTextoTiempo() {
+      const min = Math.floor(estado.tiempoRestante / 60);
+      const seg = estado.tiempoRestante % 60;
+      document.getElementById('hudTiempo').textContent =
+        `${String(min).padStart(2, '0')}:${String(seg).padStart(2, '0')}`;
+    }
+
+    function evaluarConexiones(emitirSonido = true) {
+      const N = estado.grillaSize;
+      const cola = [];
+
+      for (let r = 0; r < N; r++) {
+        for (let c = 0; c < N; c++) {
+          estado.celdas[r][c].conectada = false;
+          if (estado.celdas[r][c].tipo === 'fuente') {
+            estado.celdas[r][c].conectada = true;
+            cola.push(estado.celdas[r][c]);
+          }
+        }
+      }
+
+      const dirs = [
+        [-1, 0, 1, 4],
+        [0, 1, 2, 8],
+        [1, 0, 4, 1],
+        [0, -1, 8, 2]
+      ];
+
+      while (cola.length > 0) {
+        const actual = cola.shift();
+        const maskActual = obtenerMaskActual(actual);
+
+        for (const [dr, dc, bitSal, bitEnt] of dirs) {
+          if ((maskActual & bitSal) === 0) continue;
+          const nr = actual.r + dr;
+          const nc = actual.c + dc;
+          if (nr < 0 || nr >= N || nc < 0 || nc >= N) continue;
+
+          const vecino = estado.celdas[nr][nc];
+          if (vecino.conectada) continue;
+          if (vecino.tipo === 'vacio' || vecino.tipo === 'roca') continue;
+
+          const maskVecino = obtenerMaskActual(vecino);
+          if ((maskVecino & bitEnt) !== 0) {
+            vecino.conectada = true;
+            cola.push(vecino);
+            generarParticulasCelda(vecino.r, vecino.c, 6);
+          }
+        }
+      }
+
+      let conectados = 0;
+      for (let r = 0; r < N; r++) {
+        for (let c = 0; c < N; c++) {
+          if (estado.celdas[r][c].tipo === 'destino' && estado.celdas[r][c].conectada) {
+            conectados++;
+          }
+        }
+      }
+
+      const etiquetaEstado = document.getElementById('hudEstadoConexion');
+      etiquetaEstado.textContent = `${conectados} / ${estado.objetivosTotales} conectadas`;
+      if (conectados === estado.objetivosTotales) {
+        etiquetaEstado.classList.add('conectado');
+      } else {
+        etiquetaEstado.classList.remove('conectado');
+      }
+
+      if (emitirSonido && conectados > estado.objetivosConectadosPrevios && conectados < estado.objetivosTotales) {
+        audio.sonidoConectarObjetivo(conectados);
+      }
+      estado.objetivosConectadosPrevios = conectados;
+
+      if (!estado.nivelResuelto && conectados === estado.objetivosTotales && estado.objetivosTotales > 0) {
+        completarNivelActual();
+      }
+    }
+
+    function completarNivelActual() {
+      estado.nivelResuelto = true;
+      detenerTimer();
+      audio.sonidoNivelCompletado();
+
+      for (let r = 0; r < estado.grillaSize; r++) {
+        for (let c = 0; c < estado.grillaSize; c++) {
+          if (estado.celdas[r][c].conectada) {
+            generarParticulasCelda(r, c, 12);
+          }
+        }
+      }
+
+      const baseNivel = 200;
+      const bonusTiempo = estado.modo === 'desafio' ? estado.tiempoRestante * 3 : 50;
+      const bonusEficiencia = Math.max(20, 120 - estado.movimientosNivel * 4);
+      const ganado = baseNivel + bonusTiempo + bonusEficiencia;
+      estado.puntajeTotal += ganado;
+      document.getElementById('hudPuntos').textContent = estado.puntajeTotal;
+
+      setTimeout(() => {
+        mostrarFichaHistorica(NIVELES[estado.nivelActualIdx], ganado);
+      }, 950);
+    }
+
+    function rotarCelda(r, c) {
+      if (estado.nivelResuelto) return;
+      const celda = estado.celdas[r][c];
+      if (!celda) return;
+
+      if (celda.tipo !== 'tramo' || celda.fija) {
+        audio.sonidoBloqueado();
+        return;
+      }
+
+      celda.rotacion = (celda.rotacion + 1) % 4;
+      estado.movimientosNivel++;
+      estado.movimientosTotales++;
+      estado.celdaPista = null;
+      audio.sonidoRotar();
+      evaluarConexiones(true);
+    }
+
+    function intentarDeslizarCelda(r, c, dr, dc) {
+      if (estado.nivelResuelto) return false;
+      const N = estado.grillaSize;
+      const nr = r + dr;
+      const nc = c + dc;
+      if (nr < 0 || nr >= N || nc < 0 || nc >= N) return false;
+
+      const origen = estado.celdas[r][c];
+      const destino = estado.celdas[nr][nc];
+
+      if (origen.tipo !== 'tramo' || origen.fija || destino.tipo !== 'vacio') {
+        audio.sonidoBloqueado();
+        return false;
+      }
+
+      estado.celdas[r][c] = destino;
+      estado.celdas[nr][nc] = origen;
+
+      origen.r = nr;
+      origen.c = nc;
+      origen.offsetX = -dc;
+      origen.offsetY = -dr;
+
+      destino.r = r;
+      destino.c = c;
+
+      estado.movimientosNivel++;
+      estado.movimientosTotales++;
+      estado.celdaPista = null;
+      audio.sonidoDeslizar();
+      evaluarConexiones(true);
+      return true;
+    }
+
+    function activarPista() {
+      if (estado.nivelResuelto) return;
+      const candidatas = [];
+      for (let r = 0; r < estado.grillaSize; r++) {
+        for (let c = 0; c < estado.grillaSize; c++) {
+          const cel = estado.celdas[r][c];
+          if (cel.tipo === 'tramo' && !cel.fija && !cel.conectada) {
+            candidatas.push({ r, c });
+          }
+        }
+      }
+      if (candidatas.length > 0) {
+        estado.celdaPista = candidatas[Math.floor(Math.random() * candidatas.length)];
+        estado.tiempoPista = 2.5;
+        audio.tocarNota(523.25, 0.2, 'sine', 0.14);
+      }
+    }
+
+    /* =======================================================================
+       5. RENDERIZADO PROCEDURAL EN HTML5 CANVAS
+       ======================================================================= */
+    const canvas = document.getElementById('tableroCanvas');
+    const ctx = canvas.getContext('2d');
+    let ultimoTimestamp = 0;
+
+    function ajustarDimensionesCanvas() {
+      const rect = canvas.getBoundingClientRect();
+      if (rect.width === 0 || rect.height === 0) return;
+      const dpr = Math.min(window.devicePixelRatio || 1, 2);
+      canvas.width = Math.round(rect.width * dpr);
+      canvas.height = Math.round(rect.height * dpr);
+    }
+
+    window.addEventListener('resize', ajustarDimensionesCanvas);
+
+    function generarParticulasCelda(r, c, cantidad) {
+      const N = estado.grillaSize;
+      const cx = (c + 0.5) / N;
+      const cy = (r + 0.5) / N;
+      const colores = ['#3A8E9E', '#6BD0E0', '#C88A36', '#A8382B'];
+      for (let i = 0; i < cantidad; i++) {
+        const ang = Math.random() * Math.PI * 2;
+        const vel = 0.04 + Math.random() * 0.12;
+        estado.particulas.push({
+          x: cx,
+          y: cy,
+          vx: Math.cos(ang) * vel,
+          vy: Math.sin(ang) * vel,
+          vida: 0.6 + Math.random() * 0.5,
+          vidaMax: 1.1,
+          radio: 2.5 + Math.random() * 3.5,
+          color: colores[Math.floor(Math.random() * colores.length)]
+        });
+      }
+    }
+
+    function dibujarTablero(dt) {
+      const W = canvas.width;
+      const H = canvas.height;
+      if (W === 0 || H === 0) return;
+
+      const N = estado.grillaSize;
+      const tamCelda = W / N;
+
+      ctx.fillStyle = '#F4ECD8';
+      ctx.fillRect(0, 0, W, H);
+
+      ctx.strokeStyle = 'rgba(92, 73, 56, 0.22)';
+      ctx.lineWidth = Math.max(1.5, W * 0.003);
+      for (let i = 1; i < N; i++) {
+        const pos = i * tamCelda;
+        ctx.beginPath();
+        ctx.moveTo(pos, 0);
+        ctx.lineTo(pos, H);
+        ctx.stroke();
+
+        ctx.beginPath();
+        ctx.moveTo(0, pos);
+        ctx.lineTo(W, pos);
+        ctx.stroke();
+      }
+
+      for (let r = 0; r < N; r++) {
+        for (let c = 0; c < N; c++) {
+          const celda = estado.celdas[r][c];
+          if (!celda) continue;
+
+          const objetivoAngulo = celda.rotacion * (Math.PI / 2);
+          let diff = objetivoAngulo - celda.anguloVisual;
+          while (diff < -Math.PI) diff += Math.PI * 2;
+          while (diff > Math.PI) diff -= Math.PI * 2;
+          celda.anguloVisual += diff * Math.min(1, dt * 16);
+
+          celda.offsetX *= Math.max(0, 1 - dt * 14);
+          celda.offsetY *= Math.max(0, 1 - dt * 14);
+
+          const px = (c + celda.offsetX) * tamCelda;
+          const py = (r + celda.offsetY) * tamCelda;
+
+          dibujarCelda(ctx, celda, px, py, tamCelda);
+        }
+      }
+
+      if (estado.celdaPista && estado.tiempoPista > 0) {
+        estado.tiempoPista -= dt;
+        const { r, c } = estado.celdaPista;
+        const pulso = 0.5 + 0.5 * Math.sin(estado.animacionTiempo * 8);
+        ctx.save();
+        ctx.strokeStyle = `rgba(58, 142, 158, ${0.45 + pulso * 0.55})`;
+        ctx.lineWidth = Math.max(4, tamCelda * 0.07);
+        const pad = tamCelda * 0.06;
+        roundRect(ctx, c * tamCelda + pad, r * tamCelda + pad, tamCelda - pad * 2, tamCelda - pad * 2, tamCelda * 0.16);
+        ctx.stroke();
+        ctx.restore();
+      }
+
+      for (let i = estado.particulas.length - 1; i >= 0; i--) {
+        const p = estado.particulas[i];
+        p.x += p.vx * dt;
+        p.y += p.vy * dt;
+        p.vida -= dt;
+        if (p.vida <= 0) {
+          estado.particulas.splice(i, 1);
+          continue;
+        }
+        ctx.save();
+        ctx.globalAlpha = Math.max(0, p.vida / p.vidaMax);
+        ctx.fillStyle = p.color;
+        ctx.beginPath();
+        ctx.arc(p.x * W, p.y * H, p.radio, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.restore();
+      }
+    }
+
+    function dibujarCelda(ctx, celda, x, y, s) {
+      const pad = s * 0.065;
+      const inner = s - pad * 2;
+      const cx = x + s * 0.5;
+      const cy = y + s * 0.5;
+
+      if (celda.tipo === 'vacio') {
+        ctx.save();
+        ctx.strokeStyle = 'rgba(168, 56, 43, 0.25)';
+        ctx.setLineDash([s * 0.08, s * 0.06]);
+        ctx.lineWidth = Math.max(1.5, s * 0.02);
+        roundRect(ctx, x + pad * 1.4, y + pad * 1.4, s - pad * 2.8, s - pad * 2.8, s * 0.14);
+        ctx.stroke();
+
+        ctx.fillStyle = 'rgba(92, 73, 56, 0.16)';
+        ctx.fillRect(cx - s * 0.06, cy - s * 0.06, s * 0.12, s * 0.12);
+        ctx.restore();
+        return;
+      }
+
+      if (celda.tipo === 'roca') {
+        ctx.save();
+        ctx.fillStyle = '#DFD1B4';
+        roundRect(ctx, x + pad, y + pad, inner, inner, s * 0.16);
+        ctx.fill();
+
+        ctx.fillStyle = '#8C745A';
+        ctx.strokeStyle = '#231F20';
+        ctx.lineWidth = Math.max(2, s * 0.028);
+
+        ctx.beginPath();
+        ctx.moveTo(x + s * 0.18, y + s * 0.78);
+        ctx.lineTo(x + s * 0.38, y + s * 0.38);
+        ctx.lineTo(x + s * 0.56, y + s * 0.62);
+        ctx.lineTo(x + s * 0.70, y + s * 0.44);
+        ctx.lineTo(x + s * 0.84, y + s * 0.78);
+        ctx.closePath();
+        ctx.fill();
+        ctx.stroke();
+
+        ctx.strokeStyle = '#5A7D4C';
+        ctx.lineWidth = Math.max(3, s * 0.045);
+        ctx.lineCap = 'round';
+        ctx.beginPath();
+        ctx.moveTo(x + s * 0.28, y + s * 0.74);
+        ctx.lineTo(x + s * 0.28, y + s * 0.48);
+        ctx.moveTo(x + s * 0.28, y + s * 0.60);
+        ctx.lineTo(x + s * 0.21, y + s * 0.60);
+        ctx.lineTo(x + s * 0.21, y + s * 0.52);
+        ctx.stroke();
+        ctx.restore();
+        return;
+      }
+
+      ctx.save();
+      ctx.fillStyle = 'rgba(35, 31, 32, 0.18)';
+      roundRect(ctx, x + pad, y + pad + s * 0.03, inner, inner, s * 0.16);
+      ctx.fill();
+
+      if (celda.tipo === 'fuente') {
+        ctx.fillStyle = '#E1F2F5';
+      } else if (celda.tipo === 'destino') {
+        ctx.fillStyle = celda.conectada ? '#FDF3D7' : '#F8EFE0';
+      } else {
+        ctx.fillStyle = celda.conectada ? '#FBF7EE' : '#EFE3C8';
+      }
+
+      roundRect(ctx, x + pad, y + pad, inner, inner, s * 0.16);
+      ctx.fill();
+
+      ctx.strokeStyle = celda.conectada ? '#231F20' : '#4A3C31';
+      ctx.lineWidth = Math.max(2, s * 0.032);
+      ctx.stroke();
+
+      ctx.strokeStyle = celda.conectada ? 'rgba(168, 56, 43, 0.35)' : 'rgba(92, 73, 56, 0.2)';
+      ctx.lineWidth = Math.max(1, s * 0.015);
+      roundRect(ctx, x + pad * 1.65, y + pad * 1.65, s - pad * 3.3, s - pad * 3.3, s * 0.10);
+      ctx.stroke();
+
+      ctx.save();
+      ctx.translate(cx, cy);
+      ctx.rotate(celda.anguloVisual);
+      dibujarCanalesDeFicha(ctx, celda.maskBase, s, celda.conectada);
+      ctx.restore();
+
+      if (celda.tipo === 'fuente') {
+        dibujarIconoFuente(ctx, cx, cy, s);
+      } else if (celda.tipo === 'destino') {
+        dibujarIconoVasija(ctx, cx, cy, s, celda.conectada);
+      } else if (celda.fija) {
+        ctx.fillStyle = '#231F20';
+        const rOff = inner * 0.38;
+        const rDot = Math.max(2, s * 0.028);
+        [[-rOff, -rOff], [rOff, -rOff], [-rOff, rOff], [rOff, rOff]].forEach(([dx, dy]) => {
+          ctx.beginPath();
+          ctx.arc(cx + dx, cy + dy, rDot, 0, Math.PI * 2);
+          ctx.fill();
+        });
+      }
+
+      ctx.restore();
+    }
+
+    function dibujarCanalesDeFicha(ctx, maskBase, s, conectada) {
+      const mitad = s * 0.44;
+      const anchoExterior = s * 0.26;
+      const anchoInterior = s * 0.15;
+
+      const dirs = [
+        [1, 0, -mitad],
+        [2, mitad, 0],
+        [4, 0, mitad],
+        [8, -mitad, 0]
+      ];
+
+      ctx.lineCap = 'round';
+      ctx.strokeStyle = '#231F20';
+      ctx.lineWidth = anchoExterior + s * 0.05;
+      dirs.forEach(([bit, tx, ty]) => {
+        if (maskBase & bit) {
+          ctx.beginPath();
+          ctx.moveTo(0, 0);
+          ctx.lineTo(tx, ty);
+          ctx.stroke();
+        }
+      });
+
+      ctx.strokeStyle = '#A8382B';
+      ctx.lineWidth = anchoExterior;
+      dirs.forEach(([bit, tx, ty]) => {
+        if (maskBase & bit) {
+          ctx.beginPath();
+          ctx.moveTo(0, 0);
+          ctx.lineTo(tx, ty);
+          ctx.stroke();
+        }
+      });
+
+      ctx.strokeStyle = conectada ? '#3A8E9E' : '#D5C3A1';
+      ctx.lineWidth = anchoInterior;
+      dirs.forEach(([bit, tx, ty]) => {
+        if (maskBase & bit) {
+          ctx.beginPath();
+          ctx.moveTo(0, 0);
+          ctx.lineTo(tx, ty);
+          ctx.stroke();
+        }
+      });
+
+      if (conectada) {
+        ctx.strokeStyle = '#8BE6F5';
+        ctx.lineWidth = anchoInterior * 0.36;
+        ctx.setLineDash([s * 0.08, s * 0.08]);
+        ctx.lineDashOffset = -estado.animacionTiempo * s * 0.45;
+        dirs.forEach(([bit, tx, ty]) => {
+          if (maskBase & bit) {
+            ctx.beginPath();
+            ctx.moveTo(0, 0);
+            ctx.lineTo(tx, ty);
+            ctx.stroke();
+          }
+        });
+        ctx.setLineDash([]);
+      }
+    }
+
+    function dibujarIconoFuente(ctx, cx, cy, s) {
+      const r = s * 0.25;
+      ctx.save();
+      ctx.fillStyle = '#3A8E9E';
+      ctx.strokeStyle = '#231F20';
+      ctx.lineWidth = Math.max(2, s * 0.03);
+      ctx.beginPath();
+      ctx.arc(cx, cy, r, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.stroke();
+
+      ctx.strokeStyle = '#F4ECD8';
+      ctx.lineWidth = Math.max(2, s * 0.026);
+      ctx.beginPath();
+      for (let a = 0; a < Math.PI * 3.2; a += 0.2) {
+        const rad = (a / (Math.PI * 3.2)) * (r * 0.68);
+        const px = cx + Math.cos(a + estado.animacionTiempo * 2) * rad;
+        const py = cy + Math.sin(a + estado.animacionTiempo * 2) * rad;
+        if (a === 0) ctx.moveTo(px, py);
+        else ctx.lineTo(px, py);
+      }
+      ctx.stroke();
+      ctx.restore();
+    }
+
+    function dibujarIconoVasija(ctx, cx, cy, s, conectada) {
+      ctx.save();
+      ctx.translate(cx, cy);
+
+      if (conectada) {
+        const pulso = 0.85 + 0.15 * Math.sin(estado.animacionTiempo * 6);
+        ctx.fillStyle = 'rgba(200, 138, 54, 0.35)';
+        ctx.beginPath();
+        ctx.arc(0, 0, s * 0.34 * pulso, 0, Math.PI * 2);
+        ctx.fill();
+      }
+
+      const w = s * 0.26;
+      const h = s * 0.28;
+      ctx.fillStyle = conectada ? '#A8382B' : '#8A5A44';
+      ctx.strokeStyle = '#231F20';
+      ctx.lineWidth = Math.max(2, s * 0.028);
+
+      ctx.beginPath();
+      ctx.moveTo(-w * 0.65, -h);
+      ctx.lineTo(w * 0.65, -h);
+      ctx.lineTo(w * 0.45, -h * 0.45);
+      ctx.bezierCurveTo(w * 1.15, -h * 0.1, w * 0.95, h * 0.75, w * 0.38, h);
+      ctx.lineTo(-w * 0.38, h);
+      ctx.bezierCurveTo(-w * 0.95, h * 0.75, -w * 1.15, -h * 0.1, -w * 0.45, -h * 0.45);
+      ctx.closePath();
+      ctx.fill();
+      ctx.stroke();
+
+      ctx.fillStyle = '#F4ECD8';
+      ctx.fillRect(-w * 0.66, -h * 0.12, w * 1.32, h * 0.42);
+      ctx.strokeRect(-w * 0.66, -h * 0.12, w * 1.32, h * 0.42);
+
+      ctx.strokeStyle = '#231F20';
+      ctx.lineWidth = Math.max(1.5, s * 0.02);
+      ctx.beginPath();
+      ctx.moveTo(-w * 0.45, h * 0.18);
+      ctx.lineTo(-w * 0.20, 0);
+      ctx.lineTo(0, h * 0.18);
+      ctx.lineTo(w * 0.20, 0);
+      ctx.lineTo(w * 0.45, h * 0.18);
+      ctx.stroke();
+
+      ctx.restore();
+    }
+
+    function roundRect(ctx, x, y, width, height, radius) {
+      ctx.beginPath();
+      ctx.moveTo(x + radius, y);
+      ctx.lineTo(x + width - radius, y);
+      ctx.quadraticCurveTo(x + width, y, x + width, y + radius);
+      ctx.lineTo(x + width, y + height - radius);
+      ctx.quadraticCurveTo(x + width, y + height, x + width - radius, y + height);
+      ctx.lineTo(x + radius, y + height);
+      ctx.quadraticCurveTo(x, y + height, x, y + height - radius);
+      ctx.lineTo(x, y + radius);
+      ctx.quadraticCurveTo(x, y, x + radius, y);
+      ctx.closePath();
+    }
+
+    /* =======================================================================
+       6. EMBLEMA DE PORTADA E ILUSTRACIONES HISTÓRICAS EN CANVAS
+       ======================================================================= */
+    function dibujarEmblemaPortada() {
+      const cEmblema = document.getElementById('canvasEmblema');
+      if (!cEmblema) return;
+      const g = cEmblema.getContext('2d');
+      const w = cEmblema.width;
+      const h = cEmblema.height;
+
+      g.fillStyle = '#FAF5E8';
+      g.fillRect(0, 0, w, h);
+
+      g.strokeStyle = '#231F20';
+      g.lineWidth = 4;
+      g.beginPath();
+      g.arc(w / 2, h / 2, 54, 0, Math.PI * 2);
+      g.stroke();
+
+      g.fillStyle = '#A8382B';
+      g.beginPath();
+      g.arc(w / 2, h / 2, 46, 0, Math.PI * 2);
+      g.fill();
+
+      g.fillStyle = '#F4ECD8';
+      g.fillRect(36, h / 2 - 10, w - 72, 20);
+      g.strokeRect(36, h / 2 - 10, w - 72, 20);
+
+      g.fillStyle = '#231F20';
+      for (let i = 0; i < 4; i++) {
+        g.fillRect(44 + i * 22, h / 2 - 5, 10, 10);
+      }
+    }
+
+    function dibujarIlustracionHistoria(tipo) {
+      const cHist = document.getElementById('canvasIlustracionHistoria');
+      if (!cHist) return;
+      const g = cHist.getContext('2d');
+      const w = cHist.width;
+      const h = cHist.height;
+
+      g.fillStyle = '#F4ECD8';
+      g.fillRect(0, 0, w, h);
+
+      g.fillStyle = '#DFD1B4';
+      g.beginPath();
+      g.moveTo(0, h);
+      g.lineTo(80, 35);
+      g.lineTo(170, 75);
+      g.lineTo(270, 28);
+      g.lineTo(360, 68);
+      g.lineTo(w, 42);
+      g.lineTo(w, h);
+      g.closePath();
+      g.fill();
+
+      g.strokeStyle = '#3A8E9E';
+      g.lineWidth = 8;
+      g.lineCap = 'round';
+      g.beginPath();
+      g.moveTo(15, h - 22);
+      g.bezierCurveTo(130, h - 55, 270, h - 10, w - 15, h - 38);
+      g.stroke();
+
+      dibujarIconoVasija(g, w * 0.78, h * 0.52, 84, true);
+
+      g.fillStyle = '#231F20';
+      g.font = 'bold 14px system-ui, sans-serif';
+      const etiquetas = {
+        acequias: '💧 Acequias y riego en terrazas',
+        ceramica: '🏺 Motivos geométricos y de agua',
+        caminos: '🦙 Senderos entre valles y quebradas',
+        terrazas: '⛰️ Andenes de cultivo y pukaras',
+        memoria: '🌄 Memoria viva del pueblo diaguita'
+      };
+      g.fillText(etiquetas[tipo] || 'Cultura Diaguita', 16, 26);
+    }
+
+    /* =======================================================================
+       7. CONTROLES TÁCTILES / MOUSE EN EL TABLERO
+       ======================================================================= */
+    function obtenerCeldaDesdeEvento(e) {
+      const rect = canvas.getBoundingClientRect();
+      const x = e.clientX - rect.left;
+      const y = e.clientY - rect.top;
+      const N = estado.grillaSize;
+      const c = Math.floor((x / rect.width) * N);
+      const r = Math.floor((y / rect.height) * N);
+      if (r < 0 || r >= N || c < 0 || c >= N) return null;
+      return { r, c };
+    }
+
+    canvas.addEventListener('pointerdown', (e) => {
+      if (estado.nivelResuelto) return;
+      audio.inicializar();
+      const coord = obtenerCeldaDesdeEvento(e);
+      if (!coord) return;
+
+      estado.punteroActivo = true;
+      estado.celdaInicioGesto = coord;
+      estado.inicioX = e.clientX;
+      estado.inicioY = e.clientY;
+      estado.deslizoEnGesto = false;
+    });
+
+    canvas.addEventListener('pointermove', (e) => {
+      if (!estado.punteroActivo || !estado.celdaInicioGesto || estado.deslizoEnGesto) return;
+      const dx = e.clientX - estado.inicioX;
+      const dy = e.clientY - estado.inicioY;
+      const umbral = 22;
+
+      if (Math.abs(dx) > umbral || Math.abs(dy) > umbral) {
+        estado.deslizoEnGesto = true;
+        const { r, c } = estado.celdaInicioGesto;
+        if (Math.abs(dx) > Math.abs(dy)) {
+          intentarDeslizarCelda(r, c, 0, dx > 0 ? 1 : -1);
+        } else {
+          intentarDeslizarCelda(r, c, dy > 0 ? 1 : -1, 0);
+        }
+      }
+    });
+
+    function finalizarGesto() {
+      if (estado.punteroActivo && estado.celdaInicioGesto && !estado.deslizoEnGesto) {
+        const { r, c } = estado.celdaInicioGesto;
+        rotarCelda(r, c);
+      }
+      estado.punteroActivo = false;
+      estado.celdaInicioGesto = null;
+      estado.deslizoEnGesto = false;
+    }
+
+    canvas.addEventListener('pointerup', finalizarGesto);
+    canvas.addEventListener('pointercancel', finalizarGesto);
+
+    /* =======================================================================
+       8. NAVEGACIÓN ENTRE VISTAS, MODAL Y BOTONES
+       ======================================================================= */
+    function mostrarVista(idVista) {
+      document.querySelectorAll('.vista').forEach(v => v.classList.remove('activa'));
+      const objetivo = document.getElementById(idVista);
+      if (objetivo) objetivo.classList.add('activa');
+      if (idVista === 'vistaJuego') {
+        ajustarDimensionesCanvas();
+      }
+    }
+
+    function comenzarPartida(modo) {
+      detenerTimer();
+      estado.modo = modo;
+      estado.puntajeTotal = 0;
+      estado.movimientosTotales = 0;
+      mostrarVista('vistaJuego');
+      cargarNivel(0);
+    }
+
+    function mostrarFichaHistorica(nivel, puntosGanados) {
+      document.getElementById('modalHistoriaTitulo').textContent = nivel.historiaTitulo;
+      document.getElementById('modalHistoriaBadge').textContent = `+${puntosGanados} pts`;
+      document.getElementById('modalHistoriaTexto').textContent = nivel.historiaTexto;
+      document.getElementById('modalHistoriaDatoClave').textContent = nivel.datoClave;
+
+      const esUltimo = estado.nivelActualIdx >= NIVELES.length - 1;
+      document.getElementById('btnSiguienteNivel').innerHTML = esUltimo
+        ? '<span>Ver Resumen Final del Valle</span><span>🏆</span>'
+        : '<span>Continuar al Siguiente Valle</span><span>➡️</span>';
+
+      document.getElementById('modalHistoria').classList.add('abierto');
+      dibujarIlustracionHistoria(nivel.ilustracionTipo);
+    }
+
+    function cerrarFichaHistorica() {
+      document.getElementById('modalHistoria').classList.remove('abierto');
+      if (estado.nivelActualIdx + 1 < NIVELES.length) {
+        cargarNivel(estado.nivelActualIdx + 1);
+      } else {
+        mostrarPantallaFinal();
+      }
+    }
+
+    function mostrarPantallaFinal() {
+      detenerTimer();
+      document.getElementById('etiquetaFinalModo').textContent =
+        estado.modo === 'desafio' ? 'Modo Desafío Completado' : 'Modo Clase / Práctica Completado';
+      document.getElementById('finalNiveles').textContent = `${NIVELES.length} / ${NIVELES.length}`;
+      document.getElementById('finalPuntaje').textContent = estado.puntajeTotal;
+      document.getElementById('finalMovimientos').textContent = estado.movimientosTotales;
+
+      mostrarVista('vistaFinal');
+    }
+
+    document.getElementById('btnAudio').addEventListener('click', () => {
+      const activo = audio.alternar();
+      const btn = document.getElementById('btnAudio');
+      document.getElementById('iconoAudio').textContent = activo ? '🔊' : '🔇';
+      document.getElementById('textoAudio').textContent = activo ? 'Sonido' : 'Silencio';
+      btn.classList.toggle('activo', activo);
+    });
+
+    document.getElementById('btnIniciarDesafio').addEventListener('click', () => comenzarPartida('desafio'));
+    document.getElementById('btnIniciarPractica').addEventListener('click', () => comenzarPartida('practica'));
+    document.getElementById('btnJugarDeNuevo').addEventListener('click', () => comenzarPartida(estado.modo));
+
+    document.getElementById('btnVolverInicioLogo').addEventListener('click', () => {
+      detenerTimer();
+      mostrarVista('vistaInicio');
+    });
+
+    document.getElementById('btnMenuDesdeJuego').addEventListener('click', () => {
+      detenerTimer();
+      mostrarVista('vistaInicio');
+    });
+
+    document.getElementById('btnVolverPortadaFinal').addEventListener('click', () => {
+      mostrarVista('vistaInicio');
+    });
+
+    document.getElementById('btnReiniciarNivel').addEventListener('click', () => {
+      cargarNivel(estado.nivelActualIdx);
+    });
+
+    document.getElementById('btnPista').addEventListener('click', activarPista);
+    document.getElementById('btnSiguienteNivel').addEventListener('click', cerrarFichaHistorica);
+
+    /* =======================================================================
+       9. BUCLE PRINCIPAL DE ANIMACIÓN Y ARRANQUE
+       ======================================================================= */
+    function loopAnimacion(timestamp) {
+      if (!ultimoTimestamp) ultimoTimestamp = timestamp;
+      const dt = Math.min(0.05, (timestamp - ultimoTimestamp) / 1000);
+      ultimoTimestamp = timestamp;
+      estado.animacionTiempo += dt;
+
+      if (document.getElementById('vistaJuego').classList.contains('activa')) {
+        dibujarTablero(dt);
+      }
+
+      requestAnimationFrame(loopAnimacion);
+    }
+
+    dibujarEmblemaPortada();
+    requestAnimationFrame(loopAnimacion);
+  </script>
+</body>
+</html>
